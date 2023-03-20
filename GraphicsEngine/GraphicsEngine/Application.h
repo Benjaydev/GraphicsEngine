@@ -1,13 +1,16 @@
 #pragma once
 #include "glad.h"  
 #include "Gizmos.h"
-#include <GLFW/glfw3.h> 
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include "Shader.h"
 #include "Mesh.h"
 #include "Camera.h"
 #include <chrono>
+#include <imgui.h>
+#include "Texture.h"
+
 
 using glm::vec2;
 using glm::vec3;
@@ -42,8 +45,11 @@ protected:
 	const int windowHeight = 720;
 
 	ShaderProgram shader;
-	Mesh quadMesh;
-	mat4 quadTransform;
+	ShaderProgram phongShader;
+	ShaderProgram normalMapShader;
+
+	Mesh mesh;
+	mat4 meshTransform;
 
 	static Application* instance;
 	Camera camera;
@@ -54,10 +60,16 @@ protected:
 	float deltaTime = 0;
 	int fps = 0;
 
-
-
 private:
 	std::chrono::steady_clock::time_point lastTime;
-	
+
+	struct Light {
+		glm::vec3 direction;
+		glm::vec3 colour;
+	};
+
+	bool spinLight = true;
+	Light light;
+	glm::vec3 ambientLight;
 };
 

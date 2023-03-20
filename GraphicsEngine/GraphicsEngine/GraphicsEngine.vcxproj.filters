@@ -16,6 +16,12 @@
     <Filter Include="Source Files\Shaders">
       <UniqueIdentifier>{5d0bfb6e-9cba-4153-ad1b-2dc64ef9237d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ImGUI">
+      <UniqueIdentifier>{f3af89f6-c96c-4623-a849-547cbfae751f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AIE">
+      <UniqueIdentifier>{36ee4c75-fbfc-4ef0-ad4c-d6e1a12b7bf3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.cpp">
@@ -42,6 +48,21 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="imgui_glfw3.cpp">
+      <Filter>Source Files\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dep\imgui\imgui.cpp">
+      <Filter>Source Files\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dep\imgui\imgui_draw.cpp">
+      <Filter>Source Files\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>Source Files\AIE</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\AIE</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glad.h">
@@ -65,12 +86,39 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="imgui_glfw3.h">
+      <Filter>Source Files\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dep\imgui\imconfig.h">
+      <Filter>Source Files\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dep\imgui\imgui.h">
+      <Filter>Source Files\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dep\imgui\imgui_internal.h">
+      <Filter>Source Files\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Source Files\AIE</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Source Files\AIE</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="bin\Shaders\simple.frag">
       <Filter>Source Files\Shaders</Filter>
     </None>
     <None Include="bin\Shaders\simple.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="bin\shaders\phong.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="bin\shaders\phong.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="bin\shaders\normalmap.vert">
       <Filter>Source Files\Shaders</Filter>
     </None>
   </ItemGroup>

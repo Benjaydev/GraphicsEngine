@@ -62,6 +62,8 @@ public:
 	bool createShader(unsigned int stage, const char* string);
 	void attachShader(const std::shared_ptr<Shader>& shader);
 
+	bool CompileShader(const char* vertexShaderFilename = "", const char* fragmentShaderFilename = "");
+
 	bool link();
 
 	const char* getLastError() const { return m_lastError; }

@@ -107,6 +107,19 @@ void ShaderProgram::attachShader(const std::shared_ptr<Shader>& shader) {
 	assert(shader != nullptr);
 	m_shaders[shader->getStage()] = shader;
 }
+bool ShaderProgram::CompileShader(const char* vertexShaderFilename, const char* fragmentShaderFilename)
+{
+	// Load vertex shader from file 
+	loadShader(aie::eShaderStage::VERTEX, vertexShaderFilename);
+	// Load fragment shader from file 
+	loadShader(aie::eShaderStage::FRAGMENT, fragmentShaderFilename);
+
+	if (link() == false) {
+		printf("Shader Error: %s\n", getLastError());
+		return false;
+	}
+}
+
 
 bool ShaderProgram::link() {
 	m_program = glCreateProgram();

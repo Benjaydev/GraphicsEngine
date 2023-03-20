@@ -2,7 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-class GLFWwindow{};
+struct GLFWwindow{};
 
 using glm::vec3;
 using glm::vec4;
@@ -13,6 +13,7 @@ class Camera
 public:
 	mat4 GetViewMatrix();
 	mat4 GetProjectionMatrix(float w, float h);
+	vec3 GetPosition() { return position; }
 	void Update(float deltaTime, GLFWwindow* window);
 
 private:

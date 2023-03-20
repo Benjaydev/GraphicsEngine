@@ -1,6 +1,9 @@
 #pragma once
 #include "Application.h"
 #include <iostream>
+#include "imgui_glfw3.h"
+#include "Input.h"
+#include <string>
 
 Application* Application::instance;
 
@@ -25,7 +28,12 @@ bool Application::Startup()
         return -3;
     }
 
+    // Create input
+    aie::Input::create();
+    // Create gizmos
     Gizmos::create(10000, 10000, 0, 0);
+    // Create GUI
+    aie::ImGui_Init(window, true);
 
     glClearColor(0.25f, 0.25f, 0.25f, 1);
     glEnable(GL_DEPTH_TEST); // enables the depth buffer 
@@ -36,18 +44,19 @@ bool Application::Startup()
     glfwSetCursorPosCallback(window, &Application::SetMousePosition);
 
 
-    // Load vertex shader from file 
-    shader.loadShader(aie::eShaderStage::VERTEX, "./shaders/simple.vert");
-    // Load fragment shader from file 
-    shader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/simple.frag");
-    if (shader.link() == false) {
-        printf("Shader Error: %s\n", shader.getLastError());
-    }
+    light.direction = glm::normalize(vec3(-1));
+    light.colour = { 1, 1, 1 };
+    ambientLight = { 0.25f, 0.25f, 0.25f };
 
-    quadMesh.InitialiseFromFile("stanford/Bunny.obj");
-    //quadMesh.InitialiseBox();
-    // make the quad 10 units wide 
-    quadTransform = {
+    // Load shaders from file 
+    shader.CompileShader("./shaders/simple.vert", "./shaders/simple.frag");
+    phongShader.CompileShader("./shaders/phong.vert", "./shaders/phong.frag");
+    normalMapShader.CompileShader("./shaders/normalmap.vert", "./shaders/phong.frag");
+
+
+    mesh.InitialiseFromFile("models/soulspear.obj");
+    mesh.LoadMaterial("models/soulspear.mtl");
+    meshTransform = {
      1,0,0,0,
      0,1,0,0,
      0,0,1,0,
@@ -60,11 +69,10 @@ bool Application::Startup()
 
 void Application::Update()
 {
+
     float deltaTime = std::chrono::duration<float, std::milli>(std::chrono::high_resolution_clock::now() - lastTime).count()/1000;
     lastTime = std::chrono::high_resolution_clock::now();
     fps = (int)(1 / deltaTime);
-
-    std::cout << fps << std::endl;
 
     glfwPollEvents();
 
@@ -72,9 +80,19 @@ void Application::Update()
         applicationIsActive = false;
     }
 
+
     camera.Update(deltaTime, window);
 
     lastMousePosition = mousePosition;
+
+
+    // query time since application started 
+    float time = glfwGetTime();
+
+    if (spinLight) {
+        // rotate light 
+        light.direction = glm::normalize(vec3(glm::cos(time * 2), glm::sin(time * 2), 0));
+    }
 
 }
 
@@ -101,15 +119,39 @@ void Application::Draw()
 
     Gizmos::draw(pv);
 
-    // bind shader 
-    shader.bind();
+
 
     // bind transform 
-    auto pvm = pv * quadTransform;
-    shader.bindUniform("ProjectionViewModel", pvm);
+    auto pvm = pv * meshTransform;
+    normalMapShader.bind();
+    normalMapShader.bindUniform("AmbientColour", ambientLight);
+    normalMapShader.bindUniform("LightColour", light.colour);
+    normalMapShader.bindUniform("LightDirection", light.direction);
+    normalMapShader.bindUniform("ProjectionViewModel", pvm);
+    normalMapShader.bindUniform("ModelMatrix", meshTransform);
+    //phongShader.bindUniform("textureSample", )
+    normalMapShader.bindUniform("cameraPosition", camera.GetPosition());
+    mesh.ApplyMaterial(&normalMapShader);
+    // draw 
+    mesh.Draw();
 
-    // draw quad 
-    quadMesh.Draw();
+
+
+    aie::ImGui_NewFrame();
+
+    ImGui::Begin("FPS");
+    ImGui::Text(("FPS: " + std::to_string(fps)).c_str());
+    ImGui::End();
+
+    ImGui::Begin("Light Settings");
+    ImGui::DragFloat3("Sunlight Direction", &light.direction[0], 0.1f, -1.0f,
+        1.0f);
+    ImGui::Checkbox("Spin Sunlight", &spinLight);
+    ImGui::DragFloat3("Sunlight Colour", &light.colour[0], 0.1f, 0.0f,
+        2.0f);
+    ImGui::End();
+
+    ImGui::Render();
 
     glfwSwapBuffers(window);
 
@@ -117,6 +159,8 @@ void Application::Draw()
 
 void Application::Shutdown()
 {
+    aie::ImGui_Shutdown();
+
     Gizmos::destroy();
 
     glfwDestroyWindow(window);
