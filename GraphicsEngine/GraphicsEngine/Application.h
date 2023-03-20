@@ -2,15 +2,10 @@
 #include "glad.h"  
 #include "Gizmos.h"
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
-#include "Shader.h"
-#include "Mesh.h"
-#include "Camera.h"
 #include <chrono>
 #include <imgui.h>
 #include "Texture.h"
-
+#include "Instance.h"
 
 using glm::vec2;
 using glm::vec3;
@@ -23,6 +18,8 @@ using aie::ShaderProgram;
 class Application
 {
 public:
+
+
 	virtual bool Startup();
 	virtual void Update();
 	virtual void Draw();
@@ -37,7 +34,8 @@ public:
 	vec2 GetMousePosition() { return mousePosition; }
 	vec2 GetMouseDelta(){ return mousePosition - lastMousePosition; }
 
-	
+	static Application* instance;
+
 protected:
 	GLFWwindow* window;
 
@@ -48,11 +46,9 @@ protected:
 	ShaderProgram phongShader;
 	ShaderProgram normalMapShader;
 
-	Mesh mesh;
-	mat4 meshTransform;
+	Scene* scene;
 
-	static Application* instance;
-	Camera camera;
+
 
 	vec2 mousePosition;
 	vec2 lastMousePosition;
@@ -63,13 +59,5 @@ protected:
 private:
 	std::chrono::steady_clock::time_point lastTime;
 
-	struct Light {
-		glm::vec3 direction;
-		glm::vec3 colour;
-	};
-
-	bool spinLight = true;
-	Light light;
-	glm::vec3 ambientLight;
 };
 

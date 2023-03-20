@@ -13,7 +13,7 @@ bool Application::Startup()
         return -1;
 
     window = glfwCreateWindow(windowWidth, windowHeight,
-        "Computer Graphics",
+        "Graphics Engine",
         nullptr, nullptr);
 
     if (window == nullptr) {
@@ -44,23 +44,23 @@ bool Application::Startup()
     glfwSetCursorPosCallback(window, &Application::SetMousePosition);
 
 
-    light.direction = glm::normalize(vec3(-1));
-    light.colour = { 1, 1, 1 };
-    ambientLight = { 0.25f, 0.25f, 0.25f };
 
     // Load shaders from file 
     shader.CompileShader("./shaders/simple.vert", "./shaders/simple.frag");
     phongShader.CompileShader("./shaders/phong.vert", "./shaders/phong.frag");
     normalMapShader.CompileShader("./shaders/normalmap.vert", "./shaders/phong.frag");
 
+    Mesh* mesh = new Mesh();
+    mesh->InitialiseFromFile("models/soulspear.obj");
+    mesh->LoadMaterial("models/soulspear.mtl");
+    glm::mat4 meshTransform = {
+        1,0,0,0,
+        0,1,0,0,
+        0,0,1,0,
+        0,0,0,1 };
 
-    mesh.InitialiseFromFile("models/soulspear.obj");
-    mesh.LoadMaterial("models/soulspear.mtl");
-    meshTransform = {
-     1,0,0,0,
-     0,1,0,0,
-     0,0,1,0,
-     0,0,0,1 };
+    scene = new Scene(glm::vec2(windowWidth, windowHeight), window);
+    scene->AddInstance(new Instance(meshTransform, mesh, &normalMapShader));
 
     lastTime = std::chrono::high_resolution_clock::now();
     return true;
@@ -80,19 +80,10 @@ void Application::Update()
         applicationIsActive = false;
     }
 
-
-    camera.Update(deltaTime, window);
+    scene->Update(deltaTime);
 
     lastMousePosition = mousePosition;
 
-
-    // query time since application started 
-    float time = glfwGetTime();
-
-    if (spinLight) {
-        // rotate light 
-        light.direction = glm::normalize(vec3(glm::cos(time * 2), glm::sin(time * 2), 0));
-    }
 
 }
 
@@ -102,6 +93,10 @@ void Application::Draw()
     Gizmos::clear();
 
     Gizmos::addTransform(glm::mat4(1));
+
+    glm::mat4 pv = scene->camera->GetProjectionMatrix(windowWidth, windowHeight) * scene->camera->GetViewMatrix();
+
+
     vec4 white(1);
     vec4 black(0, 0, 0, 1);
 
@@ -115,27 +110,9 @@ void Application::Draw()
             i == 10 ? white : black);
     }
 
-    glm::mat4 pv = camera.GetProjectionMatrix(windowWidth, windowHeight) * camera.GetViewMatrix();
-
     Gizmos::draw(pv);
 
-
-
-    // bind transform 
-    auto pvm = pv * meshTransform;
-    normalMapShader.bind();
-    normalMapShader.bindUniform("AmbientColour", ambientLight);
-    normalMapShader.bindUniform("LightColour", light.colour);
-    normalMapShader.bindUniform("LightDirection", light.direction);
-    normalMapShader.bindUniform("ProjectionViewModel", pvm);
-    normalMapShader.bindUniform("ModelMatrix", meshTransform);
-    //phongShader.bindUniform("textureSample", )
-    normalMapShader.bindUniform("cameraPosition", camera.GetPosition());
-    mesh.ApplyMaterial(&normalMapShader);
-    // draw 
-    mesh.Draw();
-
-
+    scene->Draw();
 
     aie::ImGui_NewFrame();
 
@@ -144,10 +121,10 @@ void Application::Draw()
     ImGui::End();
 
     ImGui::Begin("Light Settings");
-    ImGui::DragFloat3("Sunlight Direction", &light.direction[0], 0.1f, -1.0f,
+    ImGui::DragFloat3("Sunlight Direction", &scene->light.direction[0], 0.1f, -1.0f,
         1.0f);
-    ImGui::Checkbox("Spin Sunlight", &spinLight);
-    ImGui::DragFloat3("Sunlight Colour", &light.colour[0], 0.1f, 0.0f,
+    ImGui::Checkbox("Spin Sunlight", &scene->spinLight);
+    ImGui::DragFloat3("Sunlight Colour", &scene->light.colour[0], 0.1f, 0.0f,
         2.0f);
     ImGui::End();
 
@@ -162,6 +139,7 @@ void Application::Shutdown()
     aie::ImGui_Shutdown();
 
     Gizmos::destroy();
+    delete scene;
 
     glfwDestroyWindow(window);
     glfwTerminate();
