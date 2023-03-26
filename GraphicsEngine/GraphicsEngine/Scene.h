@@ -9,6 +9,10 @@
 #include "Camera.h"
 #include "Light.h"
 #include <list>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+#define MAX_LIGHTS 4
 
 class Instance;
 
@@ -25,13 +29,28 @@ public:
 	void Draw();
 	void Update(float deltaTime);
 
+
+	int GetNumLights() { return (int)pointLights.size(); }
+	glm::vec3* GetPointLightPositions() { return &pointLightPositions[0]; }
+	glm::vec3* GetPointLightColours() { return &pointLightColours[0]; }
+	std::vector<Light>& GetPointLights() { return pointLights; }
+
+
+
 	Camera* camera;
 	glm::vec2 windowSize;
-	Light light;
+	Light sunLight;
+	std::vector<Light> pointLights;
+	glm::vec3 pointLightPositions[MAX_LIGHTS];
+	glm::vec3 pointLightColours[MAX_LIGHTS];
 	glm::vec3 ambientLight;
-	std::list<Instance*> instances;
+	std::unordered_map<aie::ShaderProgram*, std::list<Instance*>> instances;
 	bool spinLight = true;
+	bool showPointLightsDebug = true;
 
 	GLFWwindow* window;
+
+
+protected:
 
 };

@@ -8,12 +8,25 @@
 #include <fstream>
 #include <sstream>
 
+std::list<aie::Texture*> Mesh::cachedDiffuseTextures;
+std::list<aie::Texture*> Mesh::cachedSpecularTextures;
+std::list<aie::Texture*> Mesh::cachedBumpTextures;
+
 
 Mesh::~Mesh()
 {
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &vbo);
 	glDeleteBuffers(1, &ibo);
+	for (std::list<aie::Texture*>::iterator iter = cachedDiffuseTextures.begin(); iter != cachedDiffuseTextures.end(); iter++) {
+		delete *iter;
+	}
+	for (std::list<aie::Texture*>::iterator iter = cachedSpecularTextures.begin(); iter != cachedSpecularTextures.end(); iter++) {
+		delete* iter;
+	}
+	for (std::list<aie::Texture*>::iterator iter = cachedBumpTextures.begin(); iter != cachedBumpTextures.end(); iter++) {
+		delete* iter;
+	}
 }
 
 void Mesh::Initialise(unsigned int vertexCount, const Vertex* vertices, unsigned int indexCount, unsigned int* indices)
@@ -73,17 +86,17 @@ void Mesh::Initialise(unsigned int vertexCount, const Vertex* vertices, unsigned
 
 void Mesh::InitialiseQuad()
 {
-	assert(vao == 0);
+	//assert(vao == 0);
 
-	// Generate buffers
-	glGenBuffers(1, &vbo);
-	glGenVertexArrays(1, &vao);
+	//// Generate buffers
+	//glGenBuffers(1, &vbo);
+	//glGenVertexArrays(1, &vao);
 
-	// Bind the vertex array, mesh wrapper
-	glBindVertexArray(vao);
+	//// Bind the vertex array, mesh wrapper
+	//glBindVertexArray(vao);
 
-	// Bind the vertex buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	//// Bind the vertex buffer
+	//glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 
 	// Define 6 vertices for 2 triangles 
@@ -91,44 +104,43 @@ void Mesh::InitialiseQuad()
 	vertices[0].position = { -0.5f, 0, 0.5f, 1 };
 	vertices[1].position = { 0.5f, 0, 0.5f, 1 };
 	vertices[2].position = { -0.5f, 0, -0.5f, 1 };
+	vertices[3].position = { 0.5f, 0, -0.5f, 1 };
 
-	vertices[3].position = { -0.5f, 0, -0.5f, 1 };
-	vertices[4].position = { 0.5f, 0, 0.5f, 1 };
-	vertices[5].position = { 0.5f, 0, -0.5f, 1 };
+	unsigned int indices[6] = { 0, 1, 2, 2, 1, 3  };
 
 	vertices[0].normal = { 0, 1, 0,0 };
 	vertices[1].normal = { 0, 1, 0,0 };
 	vertices[2].normal = { 0, 1, 0,0 };
 	vertices[3].normal = { 0, 1, 0,0 };
-	vertices[4].normal = { 0, 1, 0,0 };
-	vertices[5].normal = { 0, 1, 0,0 };
 
 	vertices[0].texCoord = { 0.0f, 1.0f };
 	vertices[1].texCoord = { 1.0f, 1.0f };
 	vertices[2].texCoord = { 0.0f, 0.0f };
-	vertices[3].texCoord = { 0.0f, 0.0f };
-	vertices[4].texCoord = { 1.0f, 1.0f };
-	vertices[5].texCoord = { 1.0f, 0.0f };
+	vertices[3].texCoord = { 1.0f, 0.0f };
 
-	// Fill the vertex buffer 
-	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(Vertex), vertices, GL_STATIC_DRAW);
+	CalculateTangents(vertices, 4, indices, 6);
 
-	// Enable the first element as position 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+	Initialise(4, vertices, 6, indices);
 
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)16);
+	//// Fill the vertex buffer 
+	//glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(Vertex), vertices, GL_STATIC_DRAW);
 
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)32);
+	//// Enable the first element as position 
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 
-	// Unbind the buffers 
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)16);
 
-	// Quad has 2 triangles 
-	triCount = 2;
+	//glEnableVertexAttribArray(2);
+	//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)32);
+
+	//// Unbind the buffers 
+	//glBindVertexArray(0);
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	//// Quad has 2 triangles 
+	//triCount = 2;
 }
 
 void Mesh::InitialiseBox()
@@ -298,6 +310,15 @@ void Mesh::CalculateTangents(Vertex* vertices, unsigned int vertexCount, const s
 	delete[] tan1;
 }
 
+void Mesh::CalculateTangents(Vertex* vertices, unsigned int vertexCount, unsigned int indices[], unsigned int indiciesCount)
+{
+	std::vector<unsigned int> indicesVector;
+	for (int i = 0; i < indiciesCount; i++) {
+		indicesVector.push_back(indices[i]);
+	}
+	CalculateTangents(vertices, vertexCount, indicesVector);
+}
+
 void Mesh::ApplyMaterial(aie::ShaderProgram* shader)
 {
 	shader->bindUniform("Ka", Ka);
@@ -305,11 +326,13 @@ void Mesh::ApplyMaterial(aie::ShaderProgram* shader)
 	shader->bindUniform("Ks", Ks);
 	shader->bindUniform("specularPower", specularPower);
 
-	mapKd.bind(0);
+	mapKd->bind(0);
 	shader->bindUniform("diffuseTex", 0);
-	mapKs.bind(1);
+
+	mapKs->bind(1);
 	shader->bindUniform("specularTex", 1);
-	mapBump.bind(2);
+
+	mapBump->bind(2);
 	shader->bindUniform("normalTex", 2);
 
 }
@@ -320,6 +343,7 @@ void Mesh::LoadMaterial(const char* filename)
 	std::string line;
 	std::string header;
 	char buffer[256];
+
 
 	// get the path part of the fileName for use with  
 	// relative paths for maps later 
@@ -334,6 +358,7 @@ void Mesh::LoadMaterial(const char* filename)
 		line = buffer;
 		std::stringstream ss(line, std::stringstream::in | std::stringstream::out);
 
+
 		if (line.find("Ka") == 0)
 			ss >> header >> Ka.x >> Ka.y >> Ka.z;
 		else if (line.find("Ks") == 0)
@@ -346,19 +371,54 @@ void Mesh::LoadMaterial(const char* filename)
 		{
 			std::string mapFileName;
 			ss >> header >> mapFileName;
-			mapKd.load((directory + mapFileName).c_str());
+			LoadDiffuseTexture((directory + mapFileName).c_str());
+			//mapKd->load((directory + mapFileName).c_str());
 		}
 		else if (line.find("map_Ks") == 0)
 		{
 			std::string mapFileName;
 			ss >> header >> mapFileName;
-			mapKs.load((directory + mapFileName).c_str());
+			LoadSpecularTexture((directory + mapFileName).c_str());
+			//mapKs->load((directory + mapFileName).c_str());
 		}
 		else if (line.find("bump") == 0)
 		{
 			std::string mapFileName;
 			ss >> header >> mapFileName;
-			mapBump.load((directory + mapFileName).c_str());
+			LoadBumpTexture((directory + mapFileName).c_str());
+			//mapBump->load((directory + mapFileName).c_str());
 		}
 	}
+}
+
+void Mesh::LoadDiffuseTexture(const char* filename)
+{
+	mapKd = LoadTexture(filename, &cachedDiffuseTextures);
+}
+
+void Mesh::LoadSpecularTexture(const char* filename)
+{
+	mapKs = LoadTexture(filename, &cachedSpecularTextures);
+}
+
+void Mesh::LoadBumpTexture(const char* filename)
+{
+	mapBump = LoadTexture(filename, &cachedBumpTextures);
+}
+
+// Take a specific cache and search for existing texture
+aie::Texture* Mesh::LoadTexture(const char* filename, std::list<aie::Texture*>* cache)
+{
+	// Search if this texture has been previously loaded
+	for (std::list<aie::Texture*>::iterator iter = cache->begin(); iter != cache->end(); iter++) {
+		const char* name = (*iter)->getFilename().c_str();
+		if (strcmp(name, filename) == 0) {
+			return (*iter);
+		}
+	}
+	// If texture does not exist yet, load it into memory
+	aie::Texture* newTex = new aie::Texture();
+	newTex->load(filename);
+	cache->push_back(newTex);
+	return newTex;
 }

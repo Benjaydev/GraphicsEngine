@@ -195,6 +195,7 @@
     <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="bin\shaders\normalmap.frag" />
     <None Include="bin\shaders\normalmap.vert" />
     <None Include="bin\shaders\phong.frag" />
     <None Include="bin\shaders\phong.vert" />

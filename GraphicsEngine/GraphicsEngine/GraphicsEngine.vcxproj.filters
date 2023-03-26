@@ -139,5 +139,8 @@
     <None Include="bin\shaders\normalmap.vert">
       <Filter>Source Files\Shaders</Filter>
     </None>
+    <None Include="bin\shaders\normalmap.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
