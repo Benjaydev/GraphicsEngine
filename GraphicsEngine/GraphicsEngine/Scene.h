@@ -9,6 +9,11 @@
 #include "Camera.h"
 #include "Light.h"
 #include <list>
+#include <map>
+#include <utility>
+#include <vector>
+#include "RenderTarget.h"
+#define MAX_LIGHTS 4
 
 class Instance;
 
@@ -19,19 +24,38 @@ public:
 		_ambientLight, GLFWwindow* _window);
 	Scene(glm::vec2 _windowSize, GLFWwindow* _window);
 
+
 	~Scene();
 	void AddInstance(Instance* instance);
 
 	void Draw();
 	void Update(float deltaTime);
 
+	bool Start();
+
+	int GetNumLights() { return (int)pointLights.size(); }
+	glm::vec3* GetPointLightPositions() { return &pointLightPositions[0]; }
+	glm::vec3* GetPointLightColours() { return &pointLightColours[0]; }
+	std::vector<Light>& GetPointLights() { return pointLights; }
+
+
+
 	Camera* camera;
 	glm::vec2 windowSize;
-	Light light;
+	Light sunLight;
+	std::vector<Light> pointLights;
+	glm::vec3 pointLightPositions[MAX_LIGHTS];
+	glm::vec3 pointLightColours[MAX_LIGHTS];
 	glm::vec3 ambientLight;
-	std::list<Instance*> instances;
+	std::map<aie::ShaderProgram*, std::list<Instance*>> instances;
+	std::list<Instance*> postRenderTargets;
 	bool spinLight = true;
+	bool showPointLightsDebug = true;
 
 	GLFWwindow* window;
+
+	aie::RenderTarget renderTarget;
+
+protected:
 
 };

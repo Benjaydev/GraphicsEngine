@@ -163,6 +163,7 @@
     <ClCompile Include="..\dep\imgui\imgui_draw.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Gizmos.cpp" />
     <ClCompile Include="glad.c" />
@@ -182,6 +183,7 @@
     <ClInclude Include="..\dep\imgui\imgui_internal.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Gizmos.h" />
     <ClInclude Include="glad.h" />
@@ -195,11 +197,18 @@
     <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="bin\shaders\boxblur.frag" />
+    <None Include="bin\shaders\distort.frag" />
+    <None Include="bin\shaders\normalmap.frag" />
     <None Include="bin\shaders\normalmap.vert" />
     <None Include="bin\shaders\phong.frag" />
     <None Include="bin\shaders\phong.vert" />
+    <None Include="bin\shaders\post.frag" />
+    <None Include="bin\shaders\post.vert" />
     <None Include="bin\Shaders\simple.frag" />
     <None Include="bin\Shaders\simple.vert" />
+    <None Include="bin\shaders\simplekernal.frag" />
+    <None Include="bin\shaders\sobeledge.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

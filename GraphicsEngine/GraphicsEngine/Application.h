@@ -6,6 +6,7 @@
 #include <imgui.h>
 #include "Texture.h"
 #include "Instance.h"
+#include <vector>
 
 using glm::vec2;
 using glm::vec3;
@@ -45,16 +46,35 @@ protected:
 	ShaderProgram shader;
 	ShaderProgram phongShader;
 	ShaderProgram normalMapShader;
+	ShaderProgram distortShader;
+	ShaderProgram simpleKernalShader;
+	ShaderProgram sobelEdgeShader;
+	ShaderProgram boxBlurShader;
+	ShaderProgram postShader;
 
 	Scene* scene;
 
+	struct Filter {
+		Filter(const char* _name, ShaderProgram* _shader, Instance* _filter) {
+			name = _name;
+			shader = _shader;
+			filter = _filter;
+		}
+		const char* name;
+		ShaderProgram* shader;
+		Instance* filter;
+	};
 
+	std::vector<Filter> filters;
+	int selectedPostProcess = 0;
 
 	vec2 mousePosition;
 	vec2 lastMousePosition;
 
 	float deltaTime = 0;
 	int fps = 0;
+
+
 
 private:
 	std::chrono::steady_clock::time_point lastTime;

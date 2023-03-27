@@ -72,6 +72,9 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RenderTarget.cpp">
+      <Filter>Source Files\AIE</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glad.h">
@@ -122,6 +125,9 @@
     <ClInclude Include="Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RenderTarget.h">
+      <Filter>Source Files\AIE</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="bin\Shaders\simple.frag">
@@ -137,6 +143,27 @@
       <Filter>Source Files\Shaders</Filter>
     </None>
     <None Include="bin\shaders\normalmap.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="bin\shaders\normalmap.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="bin\shaders\simplekernal.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="bin\shaders\post.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="bin\shaders\post.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="bin\shaders\distort.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="bin\shaders\sobeledge.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="bin\shaders\boxblur.frag">
       <Filter>Source Files\Shaders</Filter>
     </None>
   </ItemGroup>
